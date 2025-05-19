@@ -1,0 +1,29 @@
+{
+  "local": {
+    "username": "postgres",
+    "password": "root",
+    "database": "shopping",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "staging": {
+    "username": "postgres",
+    "password": "vboAKezeSbAousmKvs2K",
+    "database": "shopping",
+    "host": "database-1.c01y048myjbj.us-east-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
