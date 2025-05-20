@@ -48,7 +48,10 @@ export const useCart = () => {
 
   const updateCartItemQuantity = async (id: string, newQuantity: number) => {
     try {
-      await axios.put(`/carts/items/${id}`, { quantity: newQuantity })
+      const response = await axios.put(`/carts/items/${id}`, {
+        quantity: newQuantity
+      })
+      setCartItems(response.data)
     } catch (error) {
       console.error('Failed to update cart item quantity:', error)
     }

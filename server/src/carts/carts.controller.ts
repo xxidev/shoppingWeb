@@ -7,49 +7,54 @@ export const createOrUpdateCart = async (req: Request, res: Response) => {
   try {
     const { userId } = res.locals
     const { items } = req.body
-    console.log('items ', items)
-    // 查找用户是否已有购物车
+
     let cart = await Cart.findOne({ where: { userId } })
 
-    // 如果没有就创建一个新购物车
     if (!cart) {
       cart = await Cart.create({ userId })
     }
 
-    const cartItems: any[] = []
-
-    if (Array.isArray(items) && items.length > 0) {
-      for (const item of items) {
-        const existingItem = await CartItem.findOne({
-          where: {
-            cartId: cart.dataValues.id,
-            productId: item.productId
-          }
-        })
-
-        if (existingItem) {
-          // 商品已存在，更新数量（累加）
-          await existingItem.update({
-            quantity: existingItem.dataValues.quantity + item.quantity
-          })
-          cartItems.push(existingItem)
-        } else {
-          // 商品不存在，新增
-          const newItem = await CartItem.create({
-            cartId: cart.dataValues.id,
-            productId: item.productId,
-            quantity: item.quantity
-          })
-          cartItems.push(newItem)
-
-          console.log('newItem', newItem.dataValues)
+    for (const item of items) {
+      const existingItem = await CartItem.findOne({
+        where: {
+          cartId: cart.dataValues.id,
+          productId: item.productId
         }
+      })
+
+      if (existingItem) {
+        await existingItem.update({
+          quantity: existingItem.dataValues.quantity + item.quantity
+        })
+      } else {
+        await CartItem.create({
+          cartId: cart.dataValues.id,
+          productId: item.productId,
+          quantity: item.quantity
+        })
       }
     }
 
-    res.status(201).json({
-      cartItems
+    const cartItems = await CartItem.findAll({
+      where: { cartId: cart.dataValues.id },
+      include: [
+        {
+          model: Product,
+          attributes: ['name', 'price']
+        }
+      ],
+      order: [['createdAt', 'DESC']] // 🔽 根据添加时间降序排列（最新的在前）
     })
+
+    const response = cartItems.map(item => ({
+      id: item.dataValues.id,
+      productId: item.dataValues.productId,
+      quantity: item.dataValues.quantity,
+      name: item.dataValues.Product?.name,
+      price: item.dataValues.Product?.price
+    }))
+
+    res.status(201).json(response)
   } catch (error) {
     console.error(error)
     res
@@ -88,12 +93,35 @@ export const updateCartItem = async (req: Request, res: Response) => {
 
     if (quantity === 0) {
       await cartItem.destroy()
-      return res.json({ message: 'Cart item removed' })
+    } else {
+      await cartItem.update({ quantity })
     }
 
-    await cartItem.update({ quantity })
+    // 返回当前用户购物车项
+    const { userId } = res.locals
+    const cart = await Cart.findOne({ where: { userId } })
+    if (!cart) return res.status(200).json([])
 
-    res.json({ message: 'Cart item updated', cartItem })
+    const cartItems = await CartItem.findAll({
+      where: { cartId: cart.dataValues.id },
+      include: [
+        {
+          model: Product,
+          attributes: ['name', 'price']
+        }
+      ],
+      order: [['createdAt', 'DESC']] // 🔽 根据添加时间降序排列（最新的在前）
+    })
+
+    const response = cartItems.map(item => ({
+      id: item.dataValues.id,
+      productId: item.dataValues.productId,
+      quantity: item.dataValues.quantity,
+      name: item.dataValues.Product?.name,
+      price: item.dataValues.Product?.price
+    }))
+
+    res.status(200).json(response)
   } catch (error) {
     console.error(error)
     res.status(500).json({ error: 'Failed to update cart item quantity' })
