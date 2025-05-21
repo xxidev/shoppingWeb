@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import CloseIcon from '@mui/icons-material/Close'
 import { CartContext } from 'contexts/CartContext'
+import { useNavigate } from 'react-router-dom'
 
 const CartPage = () => {
   const { cartItems, updateCartItemQuantity, removeCartItem, clearCart } =
@@ -35,6 +36,7 @@ const CartPage = () => {
   const handleRemove = (itemId: string) => {
     removeCartItem(itemId)
   }
+  const navigate = useNavigate()
 
   return (
     <Container maxWidth='md' sx={{ mt: 6 }}>
@@ -86,9 +88,7 @@ const CartPage = () => {
               </Box>
             </Box>
           ))}
-
           <Divider sx={{ my: 3 }} />
-
           <Box
             sx={{
               display: 'flex',
@@ -100,17 +100,16 @@ const CartPage = () => {
             <Typography variant='h6'>Total:</Typography>
             <Typography variant='h6'>${calculateTotal()}</Typography>
           </Box>
-
           <Button
             variant='contained'
             color='primary'
             size='large'
             fullWidth
             sx={{ mb: 2 }}
+            onClick={() => navigate('/order')}
           >
             Proceed to Checkout
           </Button>
-
           <Button
             variant='outlined'
             color='error'

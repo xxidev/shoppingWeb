@@ -4,8 +4,11 @@ import { errors } from 'celebrate'
 import errorHandling from 'middlewares/errorHandling.middleware'
 import cors from 'cors'
 import apiRouter from 'api.router'
+import dotenv from 'dotenv'
+
 const app = express()
 
+dotenv.config()
 app.use(express.json()) // 确保能解析 JSON 请求体
 
 // 注册用户路由

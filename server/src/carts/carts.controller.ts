@@ -43,7 +43,7 @@ export const createOrUpdateCart = async (req: Request, res: Response) => {
           attributes: ['name', 'price']
         }
       ],
-      order: [['createdAt', 'DESC']] // 🔽 根据添加时间降序排列（最新的在前）
+      order: [['createdAt', 'DESC']]
     })
 
     const response = cartItems.map(item => ({
@@ -110,7 +110,7 @@ export const updateCartItem = async (req: Request, res: Response) => {
           attributes: ['name', 'price']
         }
       ],
-      order: [['createdAt', 'DESC']] // 🔽 根据添加时间降序排列（最新的在前）
+      order: [['createdAt', 'DESC']]
     })
 
     const response = cartItems.map(item => ({
