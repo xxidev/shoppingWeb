@@ -82,8 +82,7 @@ export const deleteCart = async (req: Request, res: Response) => {
 }
 export const updateCartItem = async (req: Request, res: Response) => {
   try {
-    const { cartItemId } = req.params
-    const { quantity } = req.body
+    const { cartItemId, quantity } = req.body
 
     const cartItem = await CartItem.findByPk(cartItemId)
 

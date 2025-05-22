@@ -8,7 +8,9 @@ import {
   Card,
   CardContent,
   CardMedia,
-  Button
+  Button,
+  TextField,
+  Pagination
 } from '@mui/material'
 import { CartContext } from 'contexts/CartContext'
 
@@ -21,30 +23,30 @@ type Product = {
 
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([])
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get('/products')
-        setProducts(res.data)
+        const res = await axios.get('/products', {
+          params: {
+            search,
+            page
+          }
+        })
+        setProducts(res.data.products)
+        setTotalPages(res.data.totalPages)
       } catch (err) {
         console.error('Failed to fetch products:', err)
       }
     }
 
     fetchProducts()
-  }, [])
+  }, [search, page])
 
   const { addToCart } = useContext(CartContext)
-  const handleAddToCart = (product: Product) => {
-    addToCart({
-      id: product.id,
-      productId: String(product.id),
-      quantity: 1,
-      name: product.name,
-      price: product.price
-    })
-  }
 
   return (
     <Container maxWidth='lg' sx={{ mt: 4 }}>
@@ -60,9 +62,28 @@ const HomePage = () => {
         </Button>
       </Box>
 
-      <Typography variant='h4' gutterBottom>
-        Featured Products
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3
+        }}
+      >
+        <Typography variant='h4' gutterBottom>
+          Featured Products
+        </Typography>
+        <TextField
+          label='Search'
+          variant='outlined'
+          size='small'
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
+        />
+      </Box>
 
       <Grid container spacing={4}>
         {products.map(product => (
@@ -87,7 +108,14 @@ const HomePage = () => {
                   variant='outlined'
                   size='small'
                   sx={{ mt: 2 }}
-                  onClick={() => handleAddToCart(product)}
+                  onClick={() =>
+                    addToCart([
+                      {
+                        productId: product.id,
+                        quantity: 1
+                      }
+                    ])
+                  }
                 >
                   Add to Cart
                 </Button>
@@ -96,6 +124,17 @@ const HomePage = () => {
           </Grid>
         ))}
       </Grid>
+
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color='primary'
+          />
+        </Box>
+      )}
     </Container>
   )
 }

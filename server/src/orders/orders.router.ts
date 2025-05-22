@@ -3,11 +3,13 @@ import {
   createOrder,
   getAllOrders,
   getOrderById,
-  deleteOrder
+  deleteOrder,
+  createPayment
 } from 'orders/orders.controller'
 
 const router = express.Router()
 
+router.post('/create-payment-intent', createPayment)
 router.post('/', createOrder)
 router.get('/', getAllOrders)
 router.get('/:id', getOrderById)

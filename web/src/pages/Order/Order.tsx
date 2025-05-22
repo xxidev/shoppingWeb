@@ -18,6 +18,7 @@ import {
 } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 
+//这里
 const stripePromise = loadStripe(
   'pk_test_51RQqniIIx7zbUAmeIzC6E3aASdVfuScK8bPQzeVMxLr4DSOQXquOwWY1uLdqAsVLhDkZoUWeuTPsfPIaGTcAUOMp00QuVUR1EH'
 )
@@ -36,8 +37,11 @@ const CheckoutForm = ({ totalAmount }: { totalAmount: number }) => {
     setError('')
 
     try {
-      const res = await axios.post('/api/payments/create-payment-intent', {
-        amount: Math.round(totalAmount * 100)
+      const res = await axios.post('/orders/create-payment-intent', {
+        items: cartItems.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity
+        }))
       })
       const clientSecret = res.data.clientSecret
 
@@ -58,7 +62,7 @@ const CheckoutForm = ({ totalAmount }: { totalAmount: number }) => {
         }
 
         await axios.post('/orders', orderData)
-        clearCart()
+        await clearCart()
         navigate('/thank-you')
       }
     } catch (err: any) {

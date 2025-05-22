@@ -1,6 +1,7 @@
 import { axios } from 'api'
-import { CartItem } from 'contexts/CartContext'
+import { CartItem, Item } from 'contexts/CartContext'
 import { useState } from 'react'
+import { Source } from '@stripe/stripe-js'
 
 export const useCart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -14,10 +15,8 @@ export const useCart = () => {
     }
   }
 
-  const addToCart = async (itemOrItems: CartItem | CartItem[]) => {
+  const addToCart = async (items: Item[]) => {
     try {
-      const items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems]
-
       const response = await axios.post('/carts', {
         items: items.map(item => ({
           productId: item.productId,
@@ -33,22 +32,19 @@ export const useCart = () => {
   const clearCart = async () => {
     try {
       await axios.delete('/carts')
+      setCartItems([])
     } catch (error) {
       console.error('Failed to clear cart:', error)
     }
   }
 
-  const removeCartItem = async (id: string) => {
+  const updateCartItemQuantity = async (
+    cartItemId: string,
+    newQuantity: number
+  ) => {
     try {
-      await axios.delete(`/carts/${id}`)
-    } catch (error) {
-      console.error('Failed to remove cart item:', error)
-    }
-  }
-
-  const updateCartItemQuantity = async (id: string, newQuantity: number) => {
-    try {
-      const response = await axios.put(`/carts/items/${id}`, {
+      const response = await axios.put('/carts/items/', {
+        cartItemId,
         quantity: newQuantity
       })
       setCartItems(response.data)
@@ -61,7 +57,6 @@ export const useCart = () => {
     fetchCartItems,
     addToCart,
     updateCartItemQuantity,
-    removeCartItem,
     clearCart
   }
 }

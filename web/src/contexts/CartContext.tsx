@@ -10,12 +10,19 @@ export interface CartItem {
   price: number
 }
 
+export interface Item {
+  productId: string
+  quantity: number
+}
+
 interface CartContextType {
   cartItems: CartItem[]
-  addToCart: (item: CartItem | CartItem[]) => Promise<void>
-  updateCartItemQuantity: (id: string, newQuantity: number) => Promise<void>
+  addToCart: (items: Item[]) => Promise<void>
+  updateCartItemQuantity: (
+    cartItemId: string,
+    newQuantity: number
+  ) => Promise<void>
   fetchCartItems: () => Promise<void>
-  removeCartItem: (id: string) => Promise<void>
   clearCart: () => Promise<void>
 }
 
@@ -29,9 +36,6 @@ const defaultCartContextValue: CartContextType = {
   },
   fetchCartItems: async () => {
     throw new Error('fetchCartItems not implemented')
-  },
-  removeCartItem: async () => {
-    throw new Error('removeCartItem not implemented')
   },
   clearCart: () => {
     throw new Error('clearCart not implemented')
@@ -50,7 +54,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     fetchCartItems,
     addToCart,
     updateCartItemQuantity,
-    removeCartItem,
     clearCart
   } = useCart()
 
@@ -68,7 +71,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
         fetchCartItems,
         addToCart,
         updateCartItemQuantity,
-        removeCartItem,
         clearCart
       }}
     >

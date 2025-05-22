@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import Product from 'products/products.model'
+import { Op } from 'sequelize'
 
 export const createProduct = async (req: Request, res: Response) => {
   try {
@@ -11,11 +12,36 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 }
 
-export const getAllProducts = async (_req: Request, res: Response) => {
+export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Product.findAll()
-    res.json(products)
+    const search = req.query.search?.toString() || ''
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 6
+    const offset = (page - 1) * limit
+
+    const where = search
+      ? {
+          name: {
+            [Op.iLike]: `%${search}%`
+          }
+        }
+      : {}
+
+    const { rows: products, count: total } = await Product.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    })
+
+    res.json({
+      products,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    })
   } catch (error) {
+    console.error('[Get Products Error]', error)
     res.status(500).json({ error: 'Failed to fetch products' })
   }
 }

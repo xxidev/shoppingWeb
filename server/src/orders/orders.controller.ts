@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import Product from 'products/products.model'
 import Order from 'orders/orders.model'
 import OrderItem from 'orders/orderItems.model'
+import * as stripe from 'stripe'
+import Stripe from 'stripe'
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -115,5 +117,42 @@ export const deleteOrder = async (req: Request, res: Response) => {
     res.status(204).end()
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete order' })
+  }
+}
+
+export const createPayment = async (req: Request, res: Response) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-04-30.basil'
+  })
+
+  const { items } = req.body
+
+  try {
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'No items provided' })
+    }
+
+    let amount = 0
+    for (const item of items) {
+      const product = await Product.findByPk(item.productId)
+      if (!product) {
+        return res
+          .status(400)
+          .json({ error: `Product not found: ${item.productId}` })
+      }
+      amount += Math.round(product.dataValues.price * 100) * item.quantity
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: 'usd'
+    })
+
+    res.json({ clientSecret: paymentIntent.client_secret })
+  } catch (error: any) {
+    console.error('[Create PaymentIntent Error]', error)
+    res
+      .status(500)
+      .json({ error: error.message || 'Failed to create payment intent' })
   }
 }

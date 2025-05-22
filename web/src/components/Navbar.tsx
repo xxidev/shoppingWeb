@@ -1,12 +1,27 @@
 import React, { useContext } from 'react'
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Badge,
+  IconButton
+} from '@mui/material'
 import { Link, useNavigate } from 'react-router-dom'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { AuthContext } from 'contexts/AuthContext'
+import { CartContext } from 'contexts/CartContext' // ✅ 引入 CartContext
 
 const Navbar = () => {
   const { isAuthenticated, logout } = useContext(AuthContext)
+  const { cartItems } = useContext(CartContext) // ✅ 获取购物车数据
 
   const navigate = useNavigate()
+
+  // ✅ 计算总数量
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+
   return (
     <AppBar position='static' color='primary'>
       <Toolbar>
@@ -17,9 +32,12 @@ const Navbar = () => {
           </Link>
         </Typography>
 
-        <Button color='inherit' onClick={() => navigate('/cart')}>
-          Cart
-        </Button>
+        {/* Cart with Badge */}
+        <IconButton color='inherit' onClick={() => navigate('/cart')}>
+          <Badge badgeContent={totalQuantity} color='error'>
+            <ShoppingCartIcon />
+          </Badge>
+        </IconButton>
 
         {/* Navigation buttons */}
         <Box>

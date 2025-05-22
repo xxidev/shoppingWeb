@@ -4,12 +4,11 @@ import productsRouter from 'products/products.router'
 import authentication from 'middlewares/authentication.middleware'
 import ordersRouter from 'orders/orders.router'
 import cartsRouter from 'carts/carts.router'
-import paymentRoutes from 'payments/payments.controller'
+
 const router: Router = Router()
 router.use('/users', usersRouter)
 router.use('/products', productsRouter)
 router.use('/orders', authentication, ordersRouter)
 router.use('/carts', authentication, cartsRouter)
-router.use('/api/payments', paymentRoutes)
 
 export default router
