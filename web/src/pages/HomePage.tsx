@@ -13,6 +13,8 @@ import {
   Pagination
 } from '@mui/material'
 import { CartContext } from 'contexts/CartContext'
+import { AuthContext } from 'contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 type Product = {
   id: string
@@ -26,6 +28,8 @@ const HomePage = () => {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
+  const navigate = useNavigate()
+  const { isAuthenticated } = useContext(AuthContext)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -108,14 +112,18 @@ const HomePage = () => {
                   variant='outlined'
                   size='small'
                   sx={{ mt: 2 }}
-                  onClick={() =>
-                    addToCart([
-                      {
-                        productId: product.id,
-                        quantity: 1
-                      }
-                    ])
-                  }
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate('/login')
+                    } else {
+                      addToCart([
+                        {
+                          productId: product.id,
+                          quantity: 1
+                        }
+                      ])
+                    }
+                  }}
                 >
                   Add to Cart
                 </Button>

@@ -79,7 +79,7 @@ const CartPage = () => {
                   alignItems: 'center',
                   justifyContent: 'flex-end',
                   gap: 1,
-                  minWidth: 180 // 确保右侧宽度一致
+                  minWidth: 180
                 }}
               >
                 <IconButton
